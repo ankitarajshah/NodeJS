@@ -1,0 +1,26 @@
+extend layouts/main-layout.pug
+
+block content
+  h2 Users
+  if users.length > 0
+    table
+      thead
+        tr
+          th User ID
+          th Full Name
+          th Email
+          th Phone
+          th Actions
+      tbody
+        each user in users
+          tr
+            td= user.id
+            td= user.fullname
+            td= user.email
+            td= user.phone
+            td
+              a(href=`/edit-user/${user.id}`) Edit
+              form(action=`/delete-user/${user.id}`, method="post", style="display: inline;")
+                button(type="submit") Delete
+  else
+    p No users found.
