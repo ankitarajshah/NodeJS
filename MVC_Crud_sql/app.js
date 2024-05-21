@@ -2,14 +2,15 @@ const path = require("path");
 
 const express = require("express");
 const bodyParser = require("body-parser");
-const errorController = require("./controllers/error");
 
+const errorController = require("./controllers/error");
+const sequelize = require("./util/database");
 const Product = require("./models/product");
 const User = require("./models/user");
 const Cart = require("./models/cart");
-const CartItem = require("./models/cart-Item");
-
-const sequelize = require("./util/database");
+const CartItem = require("./models/cart-item");
+const Order = require("./models/order");
+const OrderItem = require("./models/order-item");
 
 const app = express();
 
@@ -18,16 +19,10 @@ app.set("views", "views");
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
-// db.execute("SELECT * FROM products")
-//   .then((result) => {
-//     console.log(result, "result");
-//   })
-//   .catch((err) => console.log(err, "err"));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-//middlewre for incoming req for user
 app.use((req, res, next) => {
   User.findByPk(1)
     .then((user) => {
@@ -42,34 +37,31 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-//syncing  or relate or association
 Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
 User.hasMany(Product);
-
-//cart association
 User.hasOne(Cart);
 Cart.belongsTo(User);
-
 Cart.belongsToMany(Product, { through: CartItem });
 Product.belongsToMany(Cart, { through: CartItem });
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, { through: OrderItem });
 
 sequelize
   // .sync({ force: true })
   .sync()
   .then((result) => {
-    console.log("result loggg");
     return User.findByPk(1);
-    // app.listen(3000);
+    // console.log(result);
   })
   .then((user) => {
     if (!user) {
       return User.create({ name: "Ankita", email: "ankita@gmail.com" });
     }
-    // return Promise.resolve(user);
     return user;
   })
   .then((user) => {
-    // console.log(user, "userrrr");
+    // console.log(user);
     return user.createCart();
   })
   .then((cart) => {
