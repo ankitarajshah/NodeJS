@@ -7,9 +7,7 @@ const mongoConnect = (callback) => {
   /** REPLACE CONNECTION STRING IF USING ATLAS
    *  "mongodb+srv://<username>:<password>@<cluster-id>.mongodb.net/<dbName>?retryWrites=true&authSource=admin"
    */
-  MongoClient.connect(
-    "mongodb://localhost:27017/shop?retryWrites=true&authSource=admin"
-  )
+  MongoClient.connect("mongodb://localhost:27017/shop")
     .then((client) => {
       console.log("Connected!");
       _db = client.db();
