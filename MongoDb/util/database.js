@@ -4,16 +4,20 @@ const MongoClient = mongodb.MongoClient;
 let _db;
 
 const mongoConnect = (callback) => {
-  MongoClient.connect("mongodb://localhost:27017/shop")
-    .then((res) => {
-      console.log("connected");
-      _db = res.db();
-      // callback(res);
-      // callback();
+  /** REPLACE CONNECTION STRING IF USING ATLAS
+   *  "mongodb+srv://<username>:<password>@<cluster-id>.mongodb.net/<dbName>?retryWrites=true&authSource=admin"
+   */
+  MongoClient.connect(
+    "mongodb://127.0.0.1:27017/shop?retryWrites=true&authSource=admin"
+  )
+    .then((client) => {
+      console.log("Connected!");
+      _db = client.db();
+      callback();
     })
-    .catch((e) => {
-      console.log("no connection ", e);
-      throw e;
+    .catch((err) => {
+      console.log(err);
+      throw err;
     });
 };
 
@@ -21,9 +25,8 @@ const getDb = () => {
   if (_db) {
     return _db;
   }
-  throw "no database found";
+  throw "No database found!";
 };
 
-// module.exports = mongoConnect;
 exports.mongoConnect = mongoConnect;
 exports.getDb = getDb;
