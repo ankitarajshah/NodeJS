@@ -15,7 +15,11 @@ exports.postLogin = (req, res, next) => {
       req.session.isLoggedIn = true;
       req.session.user = user;
       // req.session.isAuthenticated = true; // Set isAuthenticated to true after successful login
-      res.redirect("/");
+      // res.redirect("/");
+      req.session.save((err) => {
+        console.log(err);
+        res.redirect("/");
+      });
     })
     .catch((err) => console.log(err));
 };
