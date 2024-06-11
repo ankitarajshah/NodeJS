@@ -7,9 +7,8 @@ const errorController = require("./controllers/error");
 
 const User = require("./models/user");
 const mongoose = require("mongoose");
-
+const session = require("express-session");
 const app = express();
-
 app.set("view engine", "ejs");
 app.set("views", "views");
 
@@ -19,6 +18,13 @@ const authRoutes = require("./routes/auth");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  session({
+    secret: "my secret",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 app.use((req, res, next) => {
   User.findById("665ee0c749f789900e92bc2f")
