@@ -8,7 +8,16 @@ const errorController = require("./controllers/error");
 const User = require("./models/user");
 const mongoose = require("mongoose");
 const session = require("express-session");
+
+const MongoDBStore = require("connect-mongodb-session")(session);
+
+const MONGODB_URI = "mongodb://localhost:27017/shop";
 const app = express();
+const store = new MongoDBStore({
+  uri: MONGODB_URI,
+  collection: "sessions",
+});
+
 app.set("view engine", "ejs");
 app.set("views", "views");
 
@@ -23,17 +32,18 @@ app.use(
     secret: "my secret",
     resave: false,
     saveUninitialized: false,
+    store: store,
   })
 );
 
-app.use((req, res, next) => {
-  User.findById("665ee0c749f789900e92bc2f")
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => console.log(err));
-});
+// app.use((req, res, next) => {
+//   User.findById("665ee0c749f789900e92bc2f")
+//     .then((user) => {
+//       req.user = user;
+//       next();
+//     })
+//     .catch((err) => console.log(err));
+// });
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
@@ -41,7 +51,7 @@ app.use(authRoutes);
 
 app.use(errorController.get404);
 mongoose
-  .connect("mongodb://localhost:27017/shop")
+  .connect(MONGODB_URI)
   .then((result) => {
     User.findOne().then((user) => {
       if (!user) {
