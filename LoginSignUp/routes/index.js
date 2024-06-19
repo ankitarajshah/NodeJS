@@ -1,0 +1,19 @@
+const express = require("express");
+const { registerUser, loginUser, getUsers } = require("../Controller");
+const {
+  userRegisterValidate,
+  userLoginValidate,
+} = require("../utils/userValidation");
+const ensureAuthenticated = require("../utils/auth");
+const routes = express.Router();
+
+// Example route
+routes.get("/", (req, res) => {
+  res.send("Welcome to the API!");
+});
+
+routes.post("/register", userRegisterValidate, registerUser);
+routes.post("/login", userLoginValidate, loginUser);
+routes.get("/users", ensureAuthenticated, getUsers);
+
+module.exports = routes;
