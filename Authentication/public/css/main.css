@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700');
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,700");
 
 * {
   box-sizing: border-box;
@@ -7,7 +7,7 @@
 body {
   padding: 0;
   margin: 0;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 main {
@@ -224,6 +224,19 @@ form {
   background: red;
   color: white;
 }
+.user-message {
+  margin: auto;
+  width: 90%;
+  border: 1px solid rgb(39, 39, 206);
+  padding: 1 rem;
+  border-radius: 3px;
+  background-color: #7c7cee;
+}
+.user-message--error {
+  border-color: red;
+  background-color: rgb(209, 151, 151);
+  color: red;
+}
 
 @media (min-width: 768px) {
   .main-header__nav {
@@ -232,5 +245,8 @@ form {
 
   #side-menu-toggle {
     display: none;
+  }
+  .user-message {
+    width: 30rem;
   }
 }

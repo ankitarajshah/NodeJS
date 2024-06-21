@@ -9,6 +9,8 @@ const User = require("./models/user");
 const mongoose = require("mongoose");
 const session = require("express-session");
 
+const flash = require("connect-flash");
+
 const MongoDBStore = require("connect-mongodb-session")(session);
 
 const MONGODB_URI = "mongodb://localhost:27017/shopp";
@@ -35,6 +37,7 @@ app.use(
     store: store,
   })
 );
+app.use(flash());
 
 app.use((req, res, next) => {
   if (!req.session.user) {
