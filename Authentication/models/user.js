@@ -3,9 +3,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Order = require("../models/orders");
 const userSchema = new Schema({
-  name: {
-    type: String,
-  },
   email: {
     type: String,
     required: true,
