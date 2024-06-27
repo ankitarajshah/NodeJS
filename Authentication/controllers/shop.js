@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PDFDocument = require("pdfkit");
+const { totalmem } = require("os");
 const ITEMS_PER_PAGE = 1;
 
 exports.getProducts = (req, res, next) => {
@@ -104,6 +105,29 @@ exports.postCartDeleteProduct = (req, res, next) => {
     .deleteItemFromCart(prodId)
     .then((result) => {
       res.redirect("/cart");
+    })
+    .catch((err) => console.log(err));
+};
+exports.getCheckout = (req, res, next) => {
+  User.findById(req.user._id)
+    .populate("cart.items.productId")
+    .then((user) => {
+      if (!user) {
+        return res.redirect("/login");
+      }
+      const products = user.cart.items;
+
+      const total = products.reduce((sum, p) => {
+        return sum + p.quantity * p.productId.price;
+      }, 0);
+
+      res.render("shop/checkout", {
+        path: "/checkout",
+        pageTitle: "Checkout",
+        totalSum: total,
+        products: products,
+        isAuthenticated: req.session.isLoggedIn,
+      });
     })
     .catch((err) => console.log(err));
 };
