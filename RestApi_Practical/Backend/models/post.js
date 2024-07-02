@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { required } = require("../../Frontend/src/util/validators");
 const Schema = mongoose.Schema;
 
 const postSchema = new Schema(
@@ -15,10 +16,16 @@ const postSchema = new Schema(
       type: String,
       required: true,
     },
+
     creator: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
+    // creator: {
+    //   type: Object,
+    //   required: true,
+    // },
   },
   { timestamps: true }
 );

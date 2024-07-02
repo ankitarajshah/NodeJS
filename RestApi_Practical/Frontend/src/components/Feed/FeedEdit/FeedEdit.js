@@ -1,5 +1,4 @@
 import React, { useState, useEffect, Fragment } from "react";
-
 import Backdrop from "../../Backdrop/Backdrop";
 import Modal from "../../Modal/Modal";
 import Input from "../../Form/Input/Input";
@@ -29,34 +28,44 @@ const POST_FORM = {
   },
 };
 
-const FeedEdit = (props) => {
+const FeedEdit = () => {
+  const [editing, setEditing] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
   const [postForm, setPostForm] = useState(POST_FORM);
   const [formIsValid, setFormIsValid] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
-    if (props.editing && props.selectedPost) {
+    // Example: Fetch initial post data if editing mode
+    // Replace this with your actual logic to fetch post data
+    if (editing && selectedPost) {
+      // Simulated data update for editing
       const updatedForm = {
         title: {
           ...POST_FORM.title,
-          value: props.selectedPost.title,
+          value: selectedPost.title,
           valid: true,
         },
         image: {
           ...POST_FORM.image,
-          value: props.selectedPost.imagePath,
+          value: selectedPost.imagePath,
           valid: true,
         },
         content: {
           ...POST_FORM.content,
-          value: props.selectedPost.content,
+          value: selectedPost.content,
           valid: true,
         },
       };
       setPostForm(updatedForm);
       setFormIsValid(true);
+    } else {
+      // Reset form state if not editing
+      setPostForm(POST_FORM);
+      setFormIsValid(false);
+      setImagePreview(null);
     }
-  }, [props.editing, props.selectedPost]);
+  }, [editing, selectedPost]);
 
   const postInputChangeHandler = (input, value, files) => {
     if (files) {
@@ -101,10 +110,8 @@ const FeedEdit = (props) => {
   };
 
   const cancelPostChangeHandler = () => {
-    setPostForm(POST_FORM);
-    setFormIsValid(false);
-    setImagePreview(null);
-    props.onCancelEdit();
+    setEditing(false);
+    setSelectedPost(null);
   };
 
   const acceptPostChangeHandler = () => {
@@ -113,13 +120,14 @@ const FeedEdit = (props) => {
       image: postForm.image.value,
       content: postForm.content.value,
     };
-    props.onFinishEdit(post);
-    setPostForm(POST_FORM);
-    setFormIsValid(false);
-    setImagePreview(null);
+    // Example: Call a function to handle post submission
+    // Replace this with your actual function to handle post submission
+    console.log("Submitting post:", post);
+    setEditing(false);
+    setSelectedPost(null);
   };
 
-  return props.editing ? (
+  return editing ? (
     <Fragment>
       <Backdrop onClick={cancelPostChangeHandler} />
       <Modal
@@ -127,7 +135,7 @@ const FeedEdit = (props) => {
         acceptEnabled={formIsValid}
         onCancelModal={cancelPostChangeHandler}
         onAcceptModal={acceptPostChangeHandler}
-        isLoading={props.loading}
+        isLoading={false} // Replace with actual loading state if needed
       >
         <form>
           <Input

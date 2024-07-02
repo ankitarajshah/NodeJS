@@ -12,30 +12,44 @@ const SinglePost = () => {
     image: "",
     content: "",
   });
-
   const { postId } = useParams();
+  const [token, setToken] = useState("");
 
   useEffect(() => {
-    fetch(`URL/${postId}`)
-      .then((res) => {
-        if (res.status !== 200) {
-          throw new Error("Failed to fetch post");
-        }
-        return res.json();
+    // Fetch token or set it from wherever it's stored
+    const storedToken = localStorage.getItem("token"); // Example: Storing token in localStorage
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      fetch(`http://localhost:8080/feed/post/${postId}`, {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
       })
-      .then((resData) => {
-        setPost({
-          title: resData.post.title,
-          author: resData.post.creator.name,
-          date: new Date(resData.post.createdAt).toLocaleDateString("en-US"),
-          image: resData.post.imageUrl,
-          content: resData.post.content,
+        .then((res) => {
+          if (res.status !== 200) {
+            throw new Error("Failed to fetch post");
+          }
+          return res.json();
+        })
+        .then((resData) => {
+          setPost({
+            title: resData.post.title,
+            author: resData.post.creator.name,
+            date: new Date(resData.post.createdAt).toLocaleDateString("en-US"),
+            image: resData.post.imageUrl,
+            content: resData.post.content,
+          });
+        })
+        .catch((err) => {
+          console.log(err);
         });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [postId]); // Dependency array ensures this runs only when postId changes
+    }
+  }, [postId, token]); // Dependency array ensures this runs only when postId or token changes
 
   return (
     <section className="single-post">

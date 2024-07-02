@@ -18,9 +18,24 @@ const Feed = () => {
   const [postsLoading, setPostsLoading] = useState(true);
   const [editLoading, setEditLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [token, setToken] = useState(""); // State for storing the token
 
   useEffect(() => {
-    fetch("URL")
+    // Fetch token or set it from wherever it's stored
+    const storedToken = localStorage.getItem("token"); // Example: Storing token in localStorage
+    if (storedToken) {
+      setToken(storedToken);
+      fetchUserStatus(storedToken); // Pass the token to the fetchUserStatus function
+      loadPosts(storedToken); // Pass the token to the loadPosts function
+    }
+  }, []);
+
+  const fetchUserStatus = (token) => {
+    fetch("http://localhost:8080/auth/status", {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
       .then((res) => {
         if (res.status !== 200) {
           throw new Error("Failed to fetch user status.");
@@ -31,15 +46,11 @@ const Feed = () => {
         setStatus(resData.status);
       })
       .catch(catchError);
+  };
 
-    loadPosts();
-  }, []);
-
-  const loadPosts = (direction) => {
-    if (direction) {
-      setPostsLoading(true);
-      setPosts([]);
-    }
+  const loadPosts = (token, direction) => {
+    setPostsLoading(true);
+    setPosts([]);
     let page = postPage;
     if (direction === "next") {
       page++;
@@ -49,7 +60,11 @@ const Feed = () => {
       page--;
       setPostPage(page);
     }
-    fetch("http://localhost:8080/feed/posts")
+    fetch(`http://localhost:8080/feed/posts?page=${page}`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
       .then((res) => {
         if (res.status !== 200) {
           throw new Error("Failed to fetch posts.");
@@ -66,7 +81,14 @@ const Feed = () => {
 
   const statusUpdateHandler = (event) => {
     event.preventDefault();
-    fetch("URL")
+    fetch("http://localhost:8080/auth/status", {
+      method: "POST", // Example: Assuming this updates status
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: status }),
+    })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error("Can't update status!");
@@ -96,17 +118,17 @@ const Feed = () => {
 
   const finishEditHandler = (postData) => {
     setEditLoading(true);
-    // Set up data (with image!)
     let url = "http://localhost:8080/feed/post";
     let method = "POST";
     if (editPost) {
-      url = "URL";
+      url = "URL"; // Update URL for edit
       method = "PUT"; // Assuming you need PUT for editing
     }
 
     fetch(url, {
       method: method,
       headers: {
+        Authorization: "Bearer " + token,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -159,7 +181,12 @@ const Feed = () => {
 
   const deletePostHandler = (postId) => {
     setPostsLoading(true);
-    fetch("URL")
+    fetch("http://localhost:8080/feed/post/" + postId, {
+      method: "DELETE", // Example: Assuming this deletes a post
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error("Deleting a post failed!");
@@ -224,8 +251,8 @@ const Feed = () => {
         ) : null}
         {!postsLoading && (
           <Paginator
-            onPrevious={() => loadPosts("previous")}
-            onNext={() => loadPosts("next")}
+            onPrevious={() => loadPosts(token, "previous")}
+            onNext={() => loadPosts(token, "next")}
             lastPage={Math.ceil(totalPosts / 2)}
             currentPage={postPage}
           >
@@ -233,7 +260,7 @@ const Feed = () => {
               <Post
                 key={post._id}
                 id={post._id}
-                author={post.creator.name}
+                author={post.creator ? post.creator.name : "Unknown"}
                 date={new Date(post.createdAt).toLocaleDateString("en-US")}
                 title={post.title}
                 image={post.imageUrl}

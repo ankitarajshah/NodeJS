@@ -1,6 +1,8 @@
-export const required = value => value.trim() !== '';
+// validation.js
 
-export const length = config => value => {
+const required = (value) => value.trim() !== "";
+
+const length = (config) => (value) => {
   let isValid = true;
   if (config.min) {
     isValid = isValid && value.trim().length >= config.min;
@@ -11,7 +13,13 @@ export const length = config => value => {
   return isValid;
 };
 
-export const email = value =>
+const email = (value) =>
   /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/.test(
     value
   );
+
+module.exports = {
+  required,
+  length,
+  email,
+};

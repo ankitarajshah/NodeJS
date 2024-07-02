@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 import Layout from "./components/Layout/Layout";
 import Backdrop from "./components/Backdrop/Backdrop";
 import Toolbar from "./components/Toolbar/Toolbar";
@@ -14,6 +14,8 @@ import SignupPage from "./pages/Auth/Signup";
 import "./App.css";
 
 const App = () => {
+  const navigate = useNavigate(); // Initialize useNavigate hook
+
   const [showBackdrop, setShowBackdrop] = useState(false);
   const [showMobileNav, setShowMobileNav] = useState(false);
   const [authState, setAuthState] = useState({
@@ -80,6 +82,8 @@ const App = () => {
 
   const loginHandler = async (event, authData) => {
     event.preventDefault();
+    console.log("Login submitted:", authData); // Debug statement
+
     setAuthState({
       ...authState,
       authLoading: true,
@@ -97,14 +101,23 @@ const App = () => {
         }),
       });
 
-      if (response.status === 422) {
-        throw new Error("Validation failed.");
+      console.log("Login response:", response); // Debug statement
+
+      if (response.status === 401) {
+        throw new Error("Invalid email or password. Please try again.");
       }
-      if (response.status !== 200 && response.status !== 201) {
-        throw new Error("Could not authenticate you!");
+
+      if (!response.ok) {
+        let errorMessage = "Authentication failed!";
+        if (response.status === 422) {
+          errorMessage = "Validation failed.";
+        }
+        throw new Error(errorMessage);
       }
 
       const resData = await response.json();
+      console.log("Login response data:", resData); // Debug statement
+
       setAuthState({
         isAuth: true,
         token: resData.token,
@@ -120,8 +133,10 @@ const App = () => {
       localStorage.setItem("expiryDate", expiryDate.toISOString());
 
       setAutoLogout(remainingMilliseconds);
+      // Redirect to feed page after successful login
+      navigate("/");
     } catch (err) {
-      console.error(err);
+      console.error("Login error:", err); // Debug statement
       setAuthState({
         isAuth: false,
         token: null,
@@ -134,6 +149,8 @@ const App = () => {
 
   const signupHandler = async (event, authData) => {
     event.preventDefault();
+    console.log("Signup submitted:", authData); // Debug statement
+
     setAuthState({
       ...authState,
       authLoading: true,
@@ -141,7 +158,7 @@ const App = () => {
 
     try {
       const response = await fetch("http://localhost:8080/auth/signup", {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -151,6 +168,8 @@ const App = () => {
           name: authData.signupForm.name.value,
         }),
       });
+
+      console.log("Signup response:", response); // Debug statement
 
       if (response.status === 422) {
         throw new Error(
@@ -162,14 +181,17 @@ const App = () => {
       }
 
       const resData = await response.json();
+      console.log("Signup response data:", resData); // Debug statement
+
       setAuthState({
         ...authState,
         authLoading: false,
       });
-      // Redirect to homepage after successful signup
-      return <Navigate to="/" replace />;
+
+      // Redirect to login page after successful signup
+      navigate("/login");
     } catch (err) {
-      console.error(err);
+      console.error("Signup error:", err); // Debug statement
       setAuthState({
         isAuth: false,
         token: null,
@@ -217,7 +239,7 @@ const App = () => {
             authState.isAuth ? (
               <FeedPage userId={authState.userId} token={authState.token} />
             ) : (
-              <Navigate to="/" replace />
+              <Navigate to="/login" replace />
             )
           }
         />
@@ -230,7 +252,7 @@ const App = () => {
                 token={authState.token}
               />
             ) : (
-              <Navigate to="/" replace />
+              <Navigate to="/login" replace />
             )
           }
         />
